@@ -19,7 +19,7 @@ class Terbilang
      * @var array
      */
     protected $suffixes = [
-        'puluh', 'belas', ['', 'ratus'], ['', 'ribu', 'juta', 'miliar'], ['', 'triliun', 'septiliun', 'undesiliun', 'kuindesiliun', 'novemdesiliun'],
+        'belas', 'puluh', ['', 'ratus'], ['', 'ribu', 'juta', 'miliar'], ['', 'triliun', 'septiliun', 'undesiliun', 'kuindesiliun', 'novemdesiliun'],
     ];
     
     /**
@@ -94,13 +94,17 @@ class Terbilang
      */
     public function parse($num = '', $sep = ',')
     {
+        if ($num == '') {
+            return $this;
+        }
+
         if (! in_array($sep, $this->separators)) {
             throw new Exception('Harap gunakan koma atau titik sebagai pemisah');
         }
         
         $result = [];
         $num = trim((string) $num, ' ,.');
-        if (strpos($num, '-') === 0) {
+        if (strpos($num, '-') === 0 && rtrim($num, '0') != '-') {
             $result[] = 'minus';
         }
         
@@ -134,7 +138,7 @@ class Terbilang
     protected function read($num = '')
     {
         $num = $this->filter_num($num);
-        if ($num !== ltrim($num, '0')) {
+        if (strpos($num, '0') === 0) {
             return $this->spell($num);
         }
     
@@ -158,8 +162,8 @@ class Terbilang
                     if (isset($this->num_str[(int) $num___])) {
                         $this->result[] = rtrim($this->num_str[(int) $num___] . ' ' . $this->suffixes[2][$s_index__]); // ratus
                     } else {
-                        $this->result[] = $num___[0] == 1 ? $this->num_str[(int) $num___[1]] . ' ' . $this->suffixes[1] // belas
-                            : rtrim($this->num_str[(int) $num___[0]] . ' ' . $this->suffixes[0] .
+                        $this->result[] = $num___[0] == 1 ? $this->num_str[(int) $num___[1]] . ' ' . $this->suffixes[0] // belas
+                            : rtrim($this->num_str[(int) $num___[0]] . ' ' . $this->suffixes[1] .
                                 ' ' . $this->num_str[(int) $num___[1]]) . ';'; // puluh
                     }
     
