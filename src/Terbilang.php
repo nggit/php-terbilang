@@ -33,6 +33,9 @@ class Terbilang
     protected $separators = [',', '.'];
     
     /**
+     * Terbilang constructor.
+     * @param  string $num
+     * @param  string $sep
      * @throws Exception
      */
     public function __construct($num = '', $sep = ',')
@@ -108,6 +111,7 @@ class Terbilang
         } else {
             $sep_alt = $this->separators[array_search($sep, $this->separators) ^ 1];
             $sep_alt_pos = strpos($num, $sep_alt);
+    
             if (substr_count($num, $sep_alt) == 1 && strlen(substr($num, $sep_alt_pos)) != 4) {
                 $result[] = $this->getResult($this->read(substr($num, 0, $sep_alt_pos))->result);
                 $result[] = 'koma';
@@ -116,6 +120,7 @@ class Terbilang
                 $result[] = $this->getResult($this->read($num)->result);
             }
         }
+    
         $this->result = $result;
         
         return $this;
@@ -132,6 +137,7 @@ class Terbilang
         if ($num !== ltrim($num, '0')) {
             return $this->spell($num);
         }
+    
         if (strlen($num) > 72) {
             throw new Exception('Maaf, angka yang anda masukkan terlalu besar');
         }
@@ -148,6 +154,7 @@ class Terbilang
                 while (($len__ = strlen($num__)) > 0) {
                     $s_index__ = (int) floor(($len__ - 1) / 2);
                     $num___ = substr($num__, 0, $len__ - $s_index__ * 2);
+    
                     if (isset($this->num_str[(int) $num___])) {
                         $this->result[] = rtrim($this->num_str[(int) $num___] . ' ' . $this->suffixes[2][$s_index__]); // ratus
                     } else {
@@ -155,6 +162,7 @@ class Terbilang
                             : rtrim($this->num_str[(int) $num___[0]] . ' ' . $this->suffixes[0] .
                                 ' ' . $this->num_str[(int) $num___[1]]) . ';'; // puluh
                     }
+    
                     $num__ = ltrim(substr($num__, $len__ - $s_index__ * 2), '0');
                 }
                 
