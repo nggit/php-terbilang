@@ -19,7 +19,8 @@ class Terbilang
      * @var array
      */
     protected $suffixes = [
-        'belas', 'puluh', ['', 'ratus'], ['', 'ribu', 'juta', 'miliar'], ['', 'triliun', 'septiliun', 'undesiliun', 'kuindesiliun', 'novemdesiliun'],
+        'belas', 'puluh', ['', 'ratus'], ['', 'ribu', 'juta', 'miliar'],
+        ['', 'triliun', 'septiliun', 'undesiliun', 'kuindesiliun', 'novemdesiliun', 'trevigintiliun', 'septenvigintiliun', 'untrigintiliun'],
     ];
     
     /**
@@ -142,7 +143,7 @@ class Terbilang
             return $this->spell($num);
         }
     
-        if (strlen($num) > 72) {
+        if (strlen($num) > 108) {
             throw new Exception('Maaf, angka yang anda masukkan terlalu besar');
         }
         
@@ -174,7 +175,7 @@ class Terbilang
                 $num_ = ltrim(substr($num_, $len_ - $s_index_ * 3), '0');
             }
             
-            $this->result[] = $this->suffixes[4][$s_index] . ','; // triliun, septiliun, ..., novemdesiliun
+            $this->result[] = $this->suffixes[4][$s_index] . ','; // triliun, septiliun, ..., untrigintiliun
             $num = ltrim(substr($num, $len - $s_index * 12), '0');
         }
         

@@ -1,6 +1,6 @@
 {
     "name": "nggit/php-terbilang",
-    "description": "Pustaka PHP Terbilang Dengan Kemampuan Hingga 72 Digit",
+    "description": "Pustaka PHP Terbilang Dengan Kemampuan Hingga 108 Digit",
     "type": "library",
     "homepage": "https://github.com/nggit/php-terbilang",
     "license": "MIT",
