@@ -104,11 +104,11 @@ class Terbilang
         
         $result = [];
         $num = trim((string) $num, ' ,.');
-        if (strpos($num, '-') === 0 && rtrim($num, '0') != '-') {
+        if (strpos($num, '-') === 0 && trim($num, ',-.0') != '') {
             $result[] = 'minus';
         }
         
-        if (($sep_pos = strrpos($num, $sep)) !== false) {
+        if (($sep_pos = strrpos($num, $sep))) {
             $result[] = $this->getResult($this->read(substr($num, 0, $sep_pos))->result);
             $result[] = 'koma';
             $result[] = $this->spell(substr($num, $sep_pos))->getResult();
@@ -116,7 +116,7 @@ class Terbilang
             $sep_alt = $this->separators[array_search($sep, $this->separators) ^ 1];
             $sep_alt_pos = strpos($num, $sep_alt);
     
-            if (substr_count($num, $sep_alt) == 1 && strlen(substr($num, $sep_alt_pos)) != 4) {
+            if ($sep_alt_pos && strpos($num, '0') === 0 || substr_count($num, $sep_alt) == 1 && strlen(substr($num, $sep_alt_pos)) != 4) {
                 $result[] = $this->getResult($this->read(substr($num, 0, $sep_alt_pos))->result);
                 $result[] = 'koma';
                 $result[] = $this->spell(substr($num, $sep_alt_pos))->getResult();
