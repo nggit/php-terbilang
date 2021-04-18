@@ -32,6 +32,11 @@ class Terbilang
      * @var string[]
      */
     protected $separators = [',', '.'];
+
+    /**
+     * @var string
+     */
+    public $separator;
     
     /**
      * Terbilang constructor.
@@ -41,7 +46,8 @@ class Terbilang
      */
     public function __construct($num = '', $sep = ',')
     {
-        $this->parse($num, $sep);
+        $this->separator = $sep;
+        $this->parse($num);
     }
     
     /**
@@ -93,10 +99,14 @@ class Terbilang
      * @return $this
      * @throws Exception
      */
-    public function parse($num = '', $sep = ',')
+    public function parse($num = '', $sep = '')
     {
         if ($num == '') {
             return $this;
+        }
+
+        if ($sep == '') {
+            $sep = $this->separator;
         }
 
         if (! in_array($sep, $this->separators)) {
