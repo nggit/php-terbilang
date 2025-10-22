@@ -13,20 +13,20 @@ class Terbilang
     /**
      * @var string[]
      */
-    protected $num_str = ['', 'satu', 'dua', 'tiga', 'empat', 'lima', 'enam', 'tujuh', 'delapan', 'sembilan', 'sepuluh', 'sebelas'];
+    protected $words = ['', 'satu', 'dua', 'tiga', 'empat', 'lima', 'enam', 'tujuh', 'delapan', 'sembilan', 'sepuluh', 'sebelas'];
     
     /**
      * @var array
      */
     protected $suffixes = [
-        'belas', 'puluh', ['', 'ratus'], ['', 'ribu', 'juta', 'miliar'],
+        ['belas', 'puluh'], ['', 'ratus'], ['', 'ribu', 'juta', 'miliar'],
         ['', 'triliun', 'septiliun', 'undesiliun', 'kuindesiliun', 'novemdesiliun', 'trevigintiliun', 'septenvigintiliun', 'untrigintiliun'],
     ];
     
     /**
-     * @var array
+     * @var string
      */
-    protected $result = [];
+    public $separator;
     
     /**
      * @var string[]
@@ -34,9 +34,9 @@ class Terbilang
     protected $separators = [',', '.'];
 
     /**
-     * @var string
+     * @var array
      */
-    public $separator;
+    protected $result = [];
     
     /**
      * Terbilang constructor.
@@ -47,7 +47,10 @@ class Terbilang
     public function __construct($num = '', $sep = ',')
     {
         $this->separator = $sep;
-        $this->parse($num);
+
+        if ($num != '') {
+            $this->parse($num, $sep);
+        }
     }
     
     /**
@@ -84,13 +87,68 @@ class Terbilang
     public function spell($num = '')
     {
         $this->result = [];
+
         for ($n = 0; $n < strlen($num); $n++) {
             if (ord($num[$n]) >= 48 && ord($num[$n]) <= 57) {
-                $this->result[] = $num[$n] == '0' ? 'nol' : $this->num_str[(int) $num[$n]];
+                $this->result[] = $num[$n] == '0' ? 'nol' : $this->words[(int) $num[$n]];
             }
         }
         
         return $this;
+    }
+    
+    /**
+     * @param  string $num
+     * @param  int    $level
+     * @return $this
+     * @throws Exception
+     */
+    protected function read($num, $level = 12)
+    {
+        if ($level == 12) {
+            $num = $this->filter_num($num);
+
+            if (strpos($num, '0') === 0) {
+                return $this->spell($num);
+            }
+
+            if (strlen($num) > 108) {
+                throw new Exception('Angka yang anda masukkan terlalu besar');
+            }
+        }
+
+        $i = (int) ((strlen($num) - 1) / $level);
+        $part = substr($num, 0, strlen($num) - $i * $level);
+
+        if ($level == 12) {
+            $this->read($part, 3);
+            $this->result[] = $this->suffixes[3][$i] . ','; // triliun, ...
+        } elseif ($level == 3) {
+            $this->read($part, 2);
+            $this->result[] = $this->suffixes[2][$i]; // ribu, juta, miliar
+        } elseif ($level == 2) {
+            if ((int) $part < count($this->words)) {
+                $this->result[] = trim($this->words[(int) $part] . ' ' . $this->suffixes[1][$i]); // ratus
+            } else {
+                if ((int) $part[0] == 1) {
+                    $this->result[] = $this->words[(int) $part[1]] . ' ' . $this->suffixes[0][0]; // belas
+                } else {
+                    $this->result[] = trim(
+                        $this->words[(int) $part[0]] . ' ' .
+                        $this->suffixes[0][1] . ' ' .
+                        $this->words[(int) $part[1]]
+                    ) . ';'; // puluh
+                }
+            }
+        }
+
+        $num = ltrim(substr($num, strlen($num) - $i * $level), '0');
+
+        if ($num == '') {
+            return $this;
+        }
+
+        return $this->read($num, $level);
     }
     
     /**
@@ -101,10 +159,6 @@ class Terbilang
      */
     public function parse($num = '', $sep = '')
     {
-        if ($num == '') {
-            return $this;
-        }
-
         if ($sep == '') {
             $sep = $this->separator;
         }
@@ -112,9 +166,15 @@ class Terbilang
         if (! in_array($sep, $this->separators)) {
             throw new Exception('Harap gunakan koma atau titik sebagai pemisah');
         }
+
+        if ($num == '') {
+            return $this;
+        }
         
+        $this->result = [];
         $result = [];
         $num = trim((string) $num, ' ,.');
+
         if (strpos($num, '-') === 0 && trim($num, ',-.0') != '') {
             $result[] = 'minus';
         }
@@ -137,58 +197,6 @@ class Terbilang
         }
     
         $this->result = $result;
-        
-        return $this;
-    }
-    
-    /**
-     * @param  string $num
-     * @return $this
-     * @throws Exception
-     */
-    protected function read($num = '')
-    {
-        $num = $this->filter_num($num);
-        if (strpos($num, '0') === 0) {
-            return $this->spell($num);
-        }
-    
-        if (strlen($num) > 108) {
-            throw new Exception('Maaf, angka yang anda masukkan terlalu besar');
-        }
-        
-        $this->result = [];
-        
-        while (($len = strlen($num)) > 0) {
-            $s_index = (int) floor(($len - 1) / 12);
-            $num_ = substr($num, 0, $len - $s_index * 12);
-            while (($len_ = strlen($num_)) > 0) {
-                $s_index_ = (int) floor(($len_ - 1) / 3);
-                $num__ = substr($num_, 0, $len_ - $s_index_ * 3);
-                
-                while (($len__ = strlen($num__)) > 0) {
-                    $s_index__ = (int) floor(($len__ - 1) / 2);
-                    $num___ = substr($num__, 0, $len__ - $s_index__ * 2);
-    
-                    if (isset($this->num_str[(int) $num___])) {
-                        $this->result[] = rtrim($this->num_str[(int) $num___] . ' ' . $this->suffixes[2][$s_index__]); // ratus
-                    } else {
-                        $this->result[] = $num___[0] == 1 ? $this->num_str[(int) $num___[1]] . ' ' . $this->suffixes[0] // belas
-                            : rtrim($this->num_str[(int) $num___[0]] . ' ' . $this->suffixes[1] .
-                                ' ' . $this->num_str[(int) $num___[1]]) . ';'; // puluh
-                    }
-    
-                    $num__ = ltrim(substr($num__, $len__ - $s_index__ * 2), '0');
-                }
-                
-                $this->result[] = $this->suffixes[3][$s_index_]; // ribu, juta, miliar
-                $num_ = ltrim(substr($num_, $len_ - $s_index_ * 3), '0');
-            }
-            
-            $this->result[] = $this->suffixes[4][$s_index] . ','; // triliun, septiliun, ..., untrigintiliun
-            $num = ltrim(substr($num, $len - $s_index * 12), '0');
-        }
-        
         return $this;
     }
 }
